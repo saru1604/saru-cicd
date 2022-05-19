@@ -1,32 +1,81 @@
-name: Node CI
+name: CI-CD
 
+# Controls when the action will run. 
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: master
-    paths-ignore:
-      - "docs/**"
-      
+    branches: [ main ]
   pull_request:
-    branches: master
-    paths-ignore:
-      - "docs/**"
+    branches: [ main ]
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  # This workflow contains multiple jobs
+  build_test:
+    name: Build & Test App
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        node-version: [14.x]
+    
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@master
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
 
-      - name: Install 🔧
-        run: npm install
+      - name: setup node
+        uses: actions/setup-node@master
+        with:
+          node-version: ${{ matrix.node-version }}
+          persist-credentials: false
+      # install applicaion dependencies
+      - name: Install dependencies
+        run: |
+          npm install
+          npm ci 
+      # build and test the apps     
+#       - name: build & test
+#         run: |
+#           npm run build
+#           npm run test
+#       - name: node js app
+#         run: |
+#           node node.js
+#         with:
+#           persist-credentials: false
+#           node-version: 16
+#       - name: Update npm to latest
+#         run: npm i --prefer-online --no-fund --no-audit -g npm@latest
+#       - run: npm -v
+#       - run: npm i --ignore-scripts --no-audit --no-fund
+#       - run: npm run lint -w docs
+
+#       - name: Install 🔧
+#         run: npm install
 
       - name: Lint 🧐
-        run: npm run lint:check
+        run: npm run lint
+
+      - name: Build 🏗️
+        run: npm run build
 
       - name: Test 🚨
         run: npm test
 
-      - name: Build 🏗️
-        run: npm run build
+#       - name: Run a one-line script
+#         run: echo "Hello, world!"
+#     steps:
+#       - uses: actions/checkout@v2
+
+#       - name: Greeting
+#         run: echo "Hello, world!"
+
+# #       - name: Simulate an error
+# #         run: echo "About to fail" ; exit 1
+
+#       - name: Another greeting
+#         run: echo "Hello, world!"
